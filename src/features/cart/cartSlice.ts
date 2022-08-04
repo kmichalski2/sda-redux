@@ -14,12 +14,16 @@ const initialState: CartState = {
   items: [],
 };
 
+function findItemByName(items: Item[], name: string): Item | undefined {
+  return items.find((i) => i.name === name);
+}
+
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     addProduct: (state, action: PayloadAction<string>) => {
-      const item = state.items.find((i) => i.name === action.payload);
+      const item = findItemByName(state.items, action.payload);
 
       if (item) {
         item.quantity += 1;
@@ -33,18 +37,36 @@ export const cartSlice = createSlice({
       }
     },
     removeProduct: (state, action: PayloadAction<string>) => {
-      const name = action.payload;
-
-      const item = state.items.find((i) => i.name === name);
+      const item = findItemByName(state.items, action.payload);
 
       if (item) {
         if (item.quantity > 1) {
           item.quantity -= 1;
         } else {
-          state.items = state.items.filter((i) => i.name !== name);
+          state.items = state.items.filter((i) => i.name !== action.payload);
         }
       }
     },
+    incrementProductQuantity: (state, action: PayloadAction<string>) => {
+      const item = findItemByName(state.items, action.payload);
+
+      if (item) {
+        item.quantity++;
+      }
+    },
+    decrementProductQuantity: (state, action: PayloadAction<string>) => {
+      const item = findItemByName(state.items, action.payload);
+
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity--;
+        }
+      }
+    },
+    // TODO 3: Do widoku dodaj przycisk z "-", który
+    //           wywoła akcje decrement dla danego produktu
+    // TODO 4: Do widoku dodaj przycisk z "+", który
+    //           wywoła akcje increment dla danego produktu
   },
 });
 
@@ -58,6 +80,11 @@ export const selectQuantity = (state: RootState) => {
 
 export const selectItems = (state: RootState) => state.cart.items;
 
-export const { addProduct, removeProduct } = cartSlice.actions;
+export const {
+  addProduct,
+  removeProduct,
+  incrementProductQuantity,
+  decrementProductQuantity,
+} = cartSlice.actions;
 
 export default cartSlice.reducer;
